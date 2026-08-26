@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import '../models/totp_enrollment_response.dart';
 
 class TotpService {
-  static const String baseUrl = 'http://localhost:8080';
+  static const String baseUrl = 'https://totp-auth-backend.onrender.com';
 
   Future<TotpEnrollmentResponse> enroll({
     required String accessToken,

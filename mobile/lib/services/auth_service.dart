@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../models/login_response.dart';
 
 class AuthService {
+
   static const String baseUrl =
     'https://totp-auth-backend.onrender.com';
   Future<LoginResponse> login({
