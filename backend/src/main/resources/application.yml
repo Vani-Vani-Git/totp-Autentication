@@ -28,4 +28,4 @@ app:
     temp-auth-session-ttl-seconds: 120
 
 server:
-  port: 8080
+  port: ${PORT:10000}
