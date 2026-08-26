@@ -9,10 +9,6 @@ import com.totp.auth.service.AuthLoginService;
 import com.totp.auth.service.AuthRegistrationService;
 import com.totp.auth.service.TotpVerificationResult;
 import com.totp.auth.service.TotpVerificationService;
-import com.totp.auth.dto.PasswordRecoveryRequest;
-import com.totp.auth.service.PasswordRecoveryService;
-import com.totp.auth.dto.PasswordRecoveryVerificationRequest;
-import com.totp.auth.service.PasswordRecoveryVerificationResult;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -28,18 +24,15 @@ public class AuthController {
     private final AuthRegistrationService registrationService;
     private final AuthLoginService loginService;
     private final TotpVerificationService verificationService;
-    private final PasswordRecoveryService passwordRecoveryService;
 
     public AuthController(
             AuthRegistrationService registrationService,
             AuthLoginService loginService,
-            TotpVerificationService verificationService,
-            PasswordRecoveryService passwordRecoveryService
+            TotpVerificationService verificationService
     ) {
         this.registrationService = registrationService;
         this.loginService = loginService;
         this.verificationService = verificationService;
-        this.passwordRecoveryService = passwordRecoveryService;
     }
 
     @PostMapping("/register")
@@ -53,17 +46,6 @@ public class AuthController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
-    }
-
-    @PostMapping("/password-recovery/request")
-    public ResponseEntity<Void> requestPasswordRecovery(
-            @Valid @RequestBody PasswordRecoveryRequest request
-    ) {
-        passwordRecoveryService.sendRecoveryCode(
-                request.identifier()
-        );
-
-        return ResponseEntity.accepted().build();
     }
 
     @PostMapping("/login")
@@ -121,72 +103,7 @@ public class AuthController {
 
         return ResponseEntity.ok(response);
     }
-    @PostMapping("/password-recovery/verify")
-    public ResponseEntity<?> verifyPasswordRecovery(
-            @Valid
-            @RequestBody PasswordRecoveryVerificationRequest request
-    ) {
-        PasswordRecoveryVerificationResult result =
-                passwordRecoveryService.verifyRecoveryCode(
-                        request.identifier(),
-                        request.code()
-                );
 
-        return switch (result.status()) {
-
-            case SUCCESS -> ResponseEntity.ok(
-                    new PasswordRecoveryVerificationResponse(
-                            "SUCCESS",
-                            result.resetToken()
-                    )
-            );
-
-            case INVALID_CODE -> ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(
-                            new PasswordRecoveryErrorResponse(
-                                    "INVALID_CODE",
-                                    "Incorrect verification code."
-                            )
-                    );
-
-            case EXPIRED -> ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(
-                            new PasswordRecoveryErrorResponse(
-                                    "EXPIRED",
-                                    "The verification code has expired."
-                            )
-                    );
-
-            case LOCKED -> ResponseEntity
-                    .status(HttpStatus.LOCKED)
-                    .body(
-                            new PasswordRecoveryErrorResponse(
-                                    "LOCKED",
-                                    "Too many incorrect attempts."
-                            )
-                    );
-
-            case TOTP_ENABLED -> ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(
-                            new PasswordRecoveryErrorResponse(
-                                    "TOTP_ENABLED",
-                                    "Use your authenticator app to recover your password."
-                            )
-                    );
-
-            case NOT_FOUND -> ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(
-                            new PasswordRecoveryErrorResponse(
-                                    "INVALID_REQUEST",
-                                    "Invalid password recovery request."
-                            )
-                    );
-        };
-    }
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(
             @Valid @RequestBody TotpVerificationRequest request,
@@ -275,18 +192,6 @@ public class AuthController {
 
     public record OtpErrorResponse(
             String status,
-            String errorCode,
-            String errorMessage
-    ) {
-    }
-
-    public record PasswordRecoveryVerificationResponse(
-            String status,
-            String resetToken
-    ) {
-    }
-
-    public record PasswordRecoveryErrorResponse(
             String errorCode,
             String errorMessage
     ) {

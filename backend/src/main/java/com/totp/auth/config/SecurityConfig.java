@@ -55,9 +55,7 @@ public class SecurityConfig {
                                 "/api/auth/refresh",
                                 "/api/auth/password-reset/request",
                                 "/api/auth/password-reset/verify",
-                                "/api/auth/password-reset/complete",
-                                "/api/auth/password-recovery/request",
-                                "/api/auth/password-recovery/verify"
+                                "/api/auth/password-reset/complete"
                         ).permitAll()
 
                         // TOTP enrollment/confirmation
