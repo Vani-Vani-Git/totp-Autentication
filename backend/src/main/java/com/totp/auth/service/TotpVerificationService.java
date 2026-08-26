@@ -47,7 +47,7 @@ public class TotpVerificationService {
             long otpLockoutMinutes,
             @Value("${app.security.access-token-expiration-seconds:900}")
             long accessTokenExpirationSeconds,
-            @Value("${app.security.totp-clock-skew-steps:1}")
+            @Value("${app.security.totp-clock-skew-steps:0}")
             long clockSkewSteps
     ) {
         this.temporarySessionRepository =
